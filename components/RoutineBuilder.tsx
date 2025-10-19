@@ -1,6 +1,6 @@
-
 import React from 'react';
 import type { RoutineItem } from '../types';
+import { ProductImage } from './common/ProductImage';
 
 interface RoutineBuilderProps {
   routine: RoutineItem[];
@@ -9,7 +9,11 @@ interface RoutineBuilderProps {
 
 const RoutineCard: React.FC<{ item: RoutineItem; onRemove: (id: number) => void }> = ({ item, onRemove }) => (
     <div className="flex items-center gap-4 bg-white p-3 rounded-lg shadow-sm border border-brand-tan">
-        <img src={`https://picsum.photos/seed/${item.product.productName}/100/100`} alt={item.product.productName} className="w-16 h-16 rounded-md object-cover" />
+        <ProductImage
+            productName={item.product.productName}
+            productDescription={item.product.description}
+            className="w-16 h-16 rounded-md object-cover flex-shrink-0"
+        />
         <div className="flex-grow">
             <p className="font-semibold">{item.product.productName}</p>
             <p className="text-sm text-gray-500">{item.product.brand}</p>

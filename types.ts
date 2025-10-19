@@ -35,3 +35,15 @@ export interface UserReview {
   rating: number;
   comment: string;
 }
+
+export interface IngredientUsage {
+  name: string;
+  percentage: string;
+  notes?: string;
+}
+
+export interface IngredientGlossaryCategory {
+  categoryName: string;
+  description: string;
+  ingredients: IngredientUsage[];
+}

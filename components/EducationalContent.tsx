@@ -3,6 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { fetchEducationalContent, fetchIngredientInfo } from '../services/geminiService';
 import { Spinner } from './common/Spinner';
 import type { IngredientInfo } from '../types';
+import { IngredientGlossary } from './IngredientGlossary';
 
 const topics = [
   "The Importance of Sunscreen",
@@ -164,6 +165,18 @@ export const EducationalContent: React.FC = () => {
           <p className="text-center text-gray-500">Select a topic or search for one or more ingredients to learn more.</p>
         )}
       </div>
+
+      <div className="relative text-center my-12">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t border-brand-tan" />
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-3 text-lg text-brand-green-light">✦</span>
+        </div>
+      </div>
+
+      <IngredientGlossary />
+
     </div>
   );
 };

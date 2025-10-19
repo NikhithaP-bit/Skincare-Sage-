@@ -1,6 +1,6 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
-import type { QuizFormData, Product, IngredientInfo, UserReview } from '../types';
+import { GoogleGenAI, Type, Modality } from "@google/genai";
+import type { QuizFormData, Product, IngredientInfo, UserReview, IngredientGlossaryCategory } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
 
@@ -139,5 +139,95 @@ export const fetchEducationalContent = async (topic: string): Promise<string> =>
     } catch (error) {
         console.error("Error fetching educational content:", error);
         throw new Error("Failed to fetch educational content from AI.");
+    }
+};
+
+const imageCache = new Map<string, string>();
+
+export const generateProductImage = async (productName: string, description: string): Promise<string> => {
+    const cacheKey = productName;
+    if (imageCache.has(cacheKey)) {
+        return imageCache.get(cacheKey)!;
+    }
+
+    const prompt = `A photorealistic image of a skincare product named "${productName}". The product is described as: "${description}". The image should be a professional product shot on a clean, minimalist background, like you would see on a high-end beauty website. The product packaging should be elegant and simple.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image',
+            contents: {
+                parts: [{ text: prompt }],
+            },
+            config: {
+                responseModalities: [Modality.IMAGE],
+            },
+        });
+
+        for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+                const base64ImageBytes: string = part.inlineData.data;
+                const imageUrl = `data:image/png;base64,${base64ImageBytes}`;
+                imageCache.set(cacheKey, imageUrl);
+                return imageUrl;
+            }
+        }
+        throw new Error("No image data found in response.");
+    } catch (error) {
+        console.error(`Error generating image for ${productName}:`, error);
+        throw new Error("Failed to generate product image from AI.");
+    }
+};
+
+export const fetchIngredientGlossary = async (): Promise<IngredientGlossaryCategory[]> => {
+    const prompt = `
+        You are a skincare science educator. Generate a glossary of common skincare ingredient categories.
+        For each category, provide:
+        1. A clear category name (e.g., "Antioxidants", "Exfoliants").
+        2. A brief, one-sentence description of the category's primary function.
+        3. A list of 3-5 key ingredients within that category.
+        For each ingredient, provide:
+        1. The ingredient name.
+        2. The typical recommended usage percentage range for facial skincare (e.g., "0.5% - 2%").
+        3. A very brief optional note if necessary (e.g., "Start low").
+
+        Provide the response as a JSON array of category objects.
+    `;
+    
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            categoryName: { type: Type.STRING },
+                            description: { type: Type.STRING },
+                            ingredients: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        name: { type: Type.STRING },
+                                        percentage: { type: Type.STRING },
+                                        notes: { type: Type.STRING },
+                                    },
+                                    required: ["name", "percentage"]
+                                }
+                            }
+                        },
+                        required: ["categoryName", "description", "ingredients"]
+                    }
+                }
+            }
+        });
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText) as IngredientGlossaryCategory[];
+    } catch (error) {
+        console.error("Error fetching ingredient glossary:", error);
+        throw new Error("Failed to parse ingredient glossary from AI.");
     }
 };

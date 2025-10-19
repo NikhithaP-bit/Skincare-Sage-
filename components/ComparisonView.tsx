@@ -1,6 +1,6 @@
-
 import React from 'react';
 import type { Product } from '../types';
+import { ProductImage } from './common/ProductImage';
 
 interface ComparisonViewProps {
   products: Product[];
@@ -20,7 +20,11 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ products, onClea
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${products.length}, minmax(0, 1fr))` }}>
           {products.map(product => (
             <div key={product.productName} className="bg-brand-cream p-4 rounded-lg">
-              <img src={`https://picsum.photos/seed/${product.productName}/200/200`} alt={product.productName} className="rounded-md object-cover w-full h-32 mb-3" />
+              <ProductImage
+                productName={product.productName}
+                productDescription={product.description}
+                className="rounded-md object-cover w-full h-32 mb-3"
+              />
               <h3 className="font-bold text-sm">{product.productName}</h3>
               <p className="text-xs text-gray-600">{product.brand}</p>
               <p className="font-bold text-brand-green mt-1">${product.price.toFixed(2)}</p>

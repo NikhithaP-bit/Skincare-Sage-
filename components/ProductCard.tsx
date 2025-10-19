@@ -1,9 +1,9 @@
-
 import React, { useState, useCallback } from 'react';
 import type { Product, IngredientInfo, UserReview } from '../types';
 import { IngredientModal } from './IngredientModal';
 import { UserReviews } from './UserReviews';
 import { fetchIngredientInfo, fetchMockReviews } from '../services/geminiService';
+import { ProductImage } from './common/ProductImage';
 
 interface ProductCardProps {
   product: Product;
@@ -67,7 +67,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToRoutin
       <div className="p-6 md:p-8">
         <div className="md:flex md:gap-8">
           <div className="md:w-1/3 mb-6 md:mb-0">
-            <img src={`https://picsum.photos/seed/${product.productName}/400/400`} alt={product.productName} className="rounded-lg object-cover w-full" />
+            <ProductImage
+              productName={product.productName}
+              productDescription={product.description}
+              className="rounded-lg object-cover w-full aspect-square"
+            />
           </div>
           <div className="md:w-2/3">
             <div className="flex justify-between items-start">
